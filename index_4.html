@@ -1,0 +1,768 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spot the Landmine — a contract risk game</title>
+<meta name="description" content="A 5-minute game for contracting professionals. Tap the risky words in a clause before the clock runs out.">
+<meta name="theme-color" content="#f3f0e9">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Spot the Landmine">
+<meta property="og:description" content="Six clauses. Fifty seconds each. Tap the words that will hurt you later. A game for contracting professionals.">
+<meta name="twitter:card" content="summary">
+<style>
+  :root{
+    --bg:#f3f0e9;
+    --card:#fffdf8;
+    --ink:#1c1a17;
+    --muted:#6f6960;
+    --line:#e2ddd1;
+    --amber:#f0c14b;
+    --amber-ink:#3d2f05;
+    --danger:#b3261e;
+    --accent:#1f4f3f;
+    --shadow:0 1px 2px rgba(28,26,23,.06), 0 8px 24px -12px rgba(28,26,23,.22);
+    --radius:14px;
+    --doodle:rgba(150,104,16,.16);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#13120e;
+      --card:#1d1b16;
+      --ink:#ece7dc;
+      --muted:#9a9387;
+      --line:#2e2b23;
+      --amber:#e5b64a;
+      --amber-ink:#231902;
+      --danger:#e0655c;
+      --accent:#7fbfa6;
+      --shadow:0 1px 2px rgba(0,0,0,.4), 0 10px 30px -14px rgba(0,0,0,.7);
+      --doodle:rgba(229,182,74,.11);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    -webkit-text-size-adjust:100%;
+    min-height:100dvh;
+  }
+  /* quirky wallpaper: bombs, warning signs, paperclips and stamps, masked so it
+     re-tints itself in dark mode. Fixed, so it never scrolls into a seam. */
+  body::before{
+    content:"";
+    position:fixed;inset:0;
+    background-color:var(--doodle);
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(18,24) rotate(-10)'%3E%3Ccircle cx='14' cy='20' r='12'/%3E%3Cpath d='M21 10 l4 -5'/%3E%3Cpath d='M25 5 c5 -5 10 -1 7 4'/%3E%3Cpath d='M33 2 l3 -4 M35 7 l5 -1 M30 -2 l1 -5'/%3E%3C/g%3E%3Cg transform='translate(112,14) rotate(6)'%3E%3Cpath d='M15 2 L30 28 H0 Z'/%3E%3Cpath d='M15 12 v8 M15 24 v0.5'/%3E%3C/g%3E%3Cg transform='translate(168,84) rotate(18)'%3E%3Ccircle cx='11' cy='11' r='10'/%3E%3Cpath d='M18.5 18.5 L27 27'/%3E%3C/g%3E%3Cg transform='translate(24,104) rotate(7)'%3E%3Cpath d='M0 0 h21 l7 7 v26 h-28 z'/%3E%3Cpath d='M21 0 v7 h7'/%3E%3Cpath d='M6 14 h15 M6 20 h15 M6 26 h9'/%3E%3C/g%3E%3Cg transform='translate(96,132) rotate(-22)'%3E%3Cpath d='M15 3 v18 a5.5 5.5 0 0 1 -11 0 v-15 a3.2 3.2 0 0 1 6.4 0 v15'/%3E%3C/g%3E%3Cg transform='translate(176,168) rotate(-8)'%3E%3Ccircle cx='11' cy='11' r='10'/%3E%3Ccircle cx='11' cy='11' r='5.5'/%3E%3Cpath d='M11 1 v3 M11 18 v3 M1 11 h3 M18 11 h3'/%3E%3C/g%3E%3Cg transform='translate(52,176) rotate(-28)'%3E%3Crect x='0' y='0' width='19' height='9' rx='2.5'/%3E%3Cpath d='M9.5 9 v13'/%3E%3Cpath d='M3 22 h13'/%3E%3C/g%3E%3Cg transform='translate(128,72) rotate(-14)'%3E%3Cpath d='M0 6 h26 M13 6 v14 M6 20 h14'/%3E%3Cpath d='M0 6 l-4 9 h8 z M26 6 l-4 9 h8 z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220' viewBox='0 0 220 220'%3E%3Cg fill='none' stroke='%23000' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cg transform='translate(18,24) rotate(-10)'%3E%3Ccircle cx='14' cy='20' r='12'/%3E%3Cpath d='M21 10 l4 -5'/%3E%3Cpath d='M25 5 c5 -5 10 -1 7 4'/%3E%3Cpath d='M33 2 l3 -4 M35 7 l5 -1 M30 -2 l1 -5'/%3E%3C/g%3E%3Cg transform='translate(112,14) rotate(6)'%3E%3Cpath d='M15 2 L30 28 H0 Z'/%3E%3Cpath d='M15 12 v8 M15 24 v0.5'/%3E%3C/g%3E%3Cg transform='translate(168,84) rotate(18)'%3E%3Ccircle cx='11' cy='11' r='10'/%3E%3Cpath d='M18.5 18.5 L27 27'/%3E%3C/g%3E%3Cg transform='translate(24,104) rotate(7)'%3E%3Cpath d='M0 0 h21 l7 7 v26 h-28 z'/%3E%3Cpath d='M21 0 v7 h7'/%3E%3Cpath d='M6 14 h15 M6 20 h15 M6 26 h9'/%3E%3C/g%3E%3Cg transform='translate(96,132) rotate(-22)'%3E%3Cpath d='M15 3 v18 a5.5 5.5 0 0 1 -11 0 v-15 a3.2 3.2 0 0 1 6.4 0 v15'/%3E%3C/g%3E%3Cg transform='translate(176,168) rotate(-8)'%3E%3Ccircle cx='11' cy='11' r='10'/%3E%3Ccircle cx='11' cy='11' r='5.5'/%3E%3Cpath d='M11 1 v3 M11 18 v3 M1 11 h3 M18 11 h3'/%3E%3C/g%3E%3Cg transform='translate(52,176) rotate(-28)'%3E%3Crect x='0' y='0' width='19' height='9' rx='2.5'/%3E%3Cpath d='M9.5 9 v13'/%3E%3Cpath d='M3 22 h13'/%3E%3C/g%3E%3Cg transform='translate(128,72) rotate(-14)'%3E%3Cpath d='M0 6 h26 M13 6 v14 M6 20 h14'/%3E%3Cpath d='M0 6 l-4 9 h8 z M26 6 l-4 9 h8 z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    -webkit-mask-size:220px 220px;
+    mask-size:220px 220px;
+    -webkit-mask-repeat:repeat;
+    mask-repeat:repeat;
+    pointer-events:none;
+    z-index:-1;
+  }
+  .wrap{
+    max-width:600px;
+    margin:0 auto;
+    padding:16px 16px 40px;
+    padding-bottom:calc(40px + env(safe-area-inset-bottom));
+  }
+  h1,h2,h3{margin:0;font-weight:650;letter-spacing:-.015em;line-height:1.2}
+  .screen{display:none}
+  .screen.on{display:block;animation:fade .28s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+  /* ---------- shared bits ---------- */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:20px;
+  }
+  .btn{
+    display:block;width:100%;
+    padding:15px 18px;
+    font:inherit;font-weight:600;
+    color:var(--card);background:var(--ink);
+    border:0;border-radius:11px;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+    transition:transform .1s ease, opacity .15s ease;
+  }
+  .btn:active{transform:scale(.985)}
+  .btn.ghost{
+    background:transparent;color:var(--ink);
+    border:1px solid var(--line);
+  }
+  .eyebrow{
+    font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);
+  }
+
+  /* ---------- start ---------- */
+  .hero{text-align:center;padding:38px 20px 26px}
+  .hero .mark{
+    font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;
+    color:var(--danger);margin-bottom:18px;
+  }
+  .hero h1{font-size:clamp(32px,10vw,44px);margin-bottom:14px}
+  .hero p{color:var(--muted);margin:0 auto 4px;max-width:34ch}
+  .rules{margin:26px 0 22px;text-align:left}
+  .rules li{margin:0 0 11px;padding-left:26px;position:relative;list-style:none;color:var(--muted)}
+  .rules li b{color:var(--ink);font-weight:600}
+  .rules li::before{
+    content:"";position:absolute;left:2px;top:.55em;
+    width:9px;height:9px;border-radius:2px;background:var(--amber);
+  }
+  .rules{padding:0;margin-left:0}
+  .foot{margin-top:22px;text-align:center;font-size:13px;color:var(--muted)}
+
+  /* ---------- hud ---------- */
+  .hud{
+    display:flex;align-items:baseline;justify-content:space-between;
+    gap:12px;margin-bottom:10px;
+  }
+  .hud .round{font-size:13px;font-weight:600;color:var(--muted)}
+  .hud .score{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+  .timerbar{
+    height:6px;border-radius:99px;background:var(--line);overflow:hidden;margin-bottom:18px;
+  }
+  .timerbar span{
+    display:block;height:100%;width:100%;background:var(--accent);
+    transition:width .25s linear, background-color .3s ease, opacity .2s ease;
+  }
+  .timerbar.low span{background:var(--danger)}
+  .timerbar.paused span{opacity:.3}
+  .clause.frozen{pointer-events:none}
+
+  /* ---------- clause ---------- */
+  .clause-head{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--line);
+  }
+  .found{
+    font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;
+    color:var(--muted);white-space:nowrap;
+  }
+  .clause{
+    font-family:Georgia,"Times New Roman",serif;
+    font-size:17.5px;line-height:1.82;
+    letter-spacing:.002em;
+  }
+  .w, .mineWrap{
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mineWrap{
+    border-radius:4px;
+    -webkit-box-decoration-break:clone;
+    box-decoration-break:clone;
+    transition:background-color .2s ease,color .2s ease;
+  }
+  .mineWrap.hit{
+    background:var(--amber);color:var(--amber-ink);
+    padding:2px 4px;margin:0 -2px;
+  }
+  .w.wrong{
+    animation:flash .55s ease;
+    border-radius:4px;
+  }
+  @keyframes flash{
+    0%{background:transparent;color:inherit}
+    15%{background:var(--danger);color:#fff}
+    100%{background:transparent;color:inherit}
+  }
+
+  /* ---------- toast ---------- */
+  .toast{
+    position:fixed;left:12px;right:12px;bottom:16px;
+    bottom:calc(16px + env(safe-area-inset-bottom));
+    max-width:576px;margin:0 auto;
+    background:var(--ink);color:var(--bg);
+    border-radius:12px;padding:13px 16px;
+    font-size:14px;line-height:1.45;
+    box-shadow:0 10px 30px -8px rgba(0,0,0,.45);
+    opacity:0;transform:translateY(14px);pointer-events:none;
+    transition:opacity .2s ease,transform .2s ease;
+    z-index:50;
+  }
+  .toast.on{opacity:1;transform:none;pointer-events:auto}
+  .toast b{color:var(--amber)}
+  .toast.bad b{color:var(--danger)}
+  .toast .acts{
+    display:flex;align-items:center;gap:12px;
+    margin-top:13px;padding-top:12px;
+    border-top:1px solid rgba(128,128,128,.28);
+  }
+  .toast .pausenote{
+    font-size:12px;font-weight:600;letter-spacing:.04em;
+    opacity:.6;white-space:nowrap;
+  }
+  .toast .cont{
+    margin-left:auto;
+    background:var(--amber);color:var(--amber-ink);
+    border:0;border-radius:9px;padding:10px 18px;
+    font:inherit;font-weight:700;font-size:14px;
+    cursor:pointer;-webkit-tap-highlight-color:transparent;
+  }
+  .toast .cont:active{transform:scale(.97)}
+
+  /* ---------- round summary ---------- */
+  .sum-head{margin-bottom:18px}
+  .sum-head h2{font-size:24px;margin-bottom:6px}
+  .sum-head p{margin:0;color:var(--muted);font-size:14px}
+  .mine{
+    border-top:1px solid var(--line);
+    padding:15px 0;
+  }
+  .mine:first-of-type{border-top:0;padding-top:4px}
+  .mine .tag{
+    display:inline-block;font-size:10px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-bottom:7px;
+  }
+  .tag.got{background:var(--amber);color:var(--amber-ink)}
+  .tag.not{background:var(--danger);color:#fff}
+  .mine q{
+    display:block;font-family:Georgia,serif;font-size:16px;
+    line-height:1.5;margin-bottom:7px;
+  }
+  .mine p{margin:0;font-size:14.5px;color:var(--muted);line-height:1.6}
+  .missing{
+    margin-top:18px;padding:14px 15px;
+    background:var(--bg);border:1px solid var(--line);border-radius:10px;
+    font-size:14px;line-height:1.6;color:var(--muted);
+  }
+  .missing b{color:var(--ink);display:block;margin-bottom:4px;font-size:12px;
+    letter-spacing:.1em;text-transform:uppercase}
+
+  /* ---------- end ---------- */
+  .final{text-align:center;padding:30px 20px}
+  .final .bigscore{
+    font-size:clamp(48px,16vw,70px);font-weight:700;line-height:1;
+    letter-spacing:-.03em;font-variant-numeric:tabular-nums;margin:8px 0 10px;
+  }
+  .final .rank{
+    display:inline-block;background:var(--amber);color:var(--amber-ink);
+    font-weight:700;font-size:15px;padding:7px 16px;border-radius:99px;margin-bottom:16px;
+  }
+  .final .detail{color:var(--muted);font-size:14.5px;margin:0 auto;max-width:30ch}
+  .stack{display:grid;gap:10px;margin-top:26px}
+  .copied{font-size:13px;color:var(--accent);text-align:center;height:18px;margin-top:8px;font-weight:600}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ START ============ -->
+  <section id="s-start" class="screen on">
+    <div class="hero">
+      <div class="mark">⚠ Handle with care</div>
+      <h1>Spot the Landmine</h1>
+      <p>Six clauses. Fifty seconds each. Tap the words that will hurt you later.</p>
+    </div>
+    <div class="card">
+      <div class="eyebrow" style="margin-bottom:14px">How it works</div>
+      <ul class="rules">
+        <li><b>Every word is tappable.</b> Find the risky ones — a bad standard, a missing limit, a word doing far more work than it looks like.</li>
+        <li><b>Right tap:</b> the phrase lights up, you get 100 points and a one-line explanation.</li>
+        <li><b>Wrong tap:</b> minus 25 points and three seconds off the clock. Guessing is expensive.</li>
+        <li><b>Time left</b> converts to points, so speed pays.</li>
+      </ul>
+      <button class="btn" onclick="startGame()">Start the first clause</button>
+      <div class="foot">Six clauses drawn at random from eight. No two rounds quite the same.</div>
+    </div>
+  </section>
+
+  <!-- ============ PLAY ============ -->
+  <section id="s-play" class="screen">
+    <div class="hud">
+      <span class="round" id="roundLabel">Clause 1 of 6</span>
+      <span class="score" id="scoreLabel">0 pts</span>
+    </div>
+    <div class="timerbar" id="timerbar"><span id="timerfill"></span></div>
+    <div class="card">
+      <div class="clause-head">
+        <span class="eyebrow" id="clauseHeading">Limitation of Liability</span>
+        <span class="found" id="foundLabel">0 / 3 found</span>
+      </div>
+      <div class="clause" id="clauseText"></div>
+    </div>
+  </section>
+
+  <!-- ============ ROUND SUMMARY ============ -->
+  <section id="s-summary" class="screen">
+    <div class="sum-head">
+      <h2 id="sumTitle">Clause cleared</h2>
+      <p id="sumSub">You found 3 of 3. +420 points.</p>
+    </div>
+    <div class="card" id="sumBody"></div>
+    <div class="stack">
+      <button class="btn" id="nextBtn" onclick="nextRound()">Next clause</button>
+    </div>
+  </section>
+
+  <!-- ============ END ============ -->
+  <section id="s-end" class="screen">
+    <div class="card final">
+      <div class="eyebrow">Final score</div>
+      <div class="bigscore" id="finalScore">0</div>
+      <div class="rank" id="finalRank">Junior Counsel</div>
+      <p class="detail" id="finalDetail"></p>
+    </div>
+    <div class="stack">
+      <button class="btn" onclick="shareScore()">Copy my score to share</button>
+      <button class="btn ghost" onclick="location.reload()">Play again</button>
+    </div>
+    <div class="copied" id="copied"></div>
+    <div class="foot">Built for people who read the whole thing.</div>
+  </section>
+
+</div>
+
+<div class="toast" id="toast">
+  <div id="toastText"></div>
+  <div class="acts" id="toastActs" hidden>
+    <span class="pausenote">Clock paused</span>
+    <button class="cont" id="toastBtn" onclick="resumePlay()">Keep looking</button>
+  </div>
+</div>
+
+<script>
+/* =======================================================================
+   CLAUSE LIBRARY
+   Each landmine `p` must appear EXACTLY ONCE in its clause text.
+   ======================================================================= */
+const CLAUSES = [
+{
+  heading: "Limitation of Liability",
+  text: "The Supplier's total aggregate liability under this Agreement shall in no event exceed the fees paid by the Customer in the three (3) months preceding the claim. Nothing in this clause shall limit the Customer's liability for any amounts payable to the Supplier. The Supplier shall not be liable for any indirect, special or consequential loss, or for any loss of profits, revenue or data, howsoever arising.",
+  mines: [
+    { p:"the three (3) months preceding the claim",
+      why:"A cap set at three months' fees is often a rounding error next to the harm a failure can actually cause. Benchmark the cap against contract value and the realistic downside — twelve months' fees is the usual floor, and higher where data or IP is in play." },
+    { p:"Nothing in this clause shall limit the Customer's liability",
+      why:"The cap runs one way. The Supplier is protected; the Customer is exposed without limit. Unless there is a real commercial reason, caps should be mutual." },
+    { p:"loss of profits, revenue or data",
+      why:"Lost profits and revenue are frequently direct losses, not consequential ones. Excluding them outright can hollow out the remedy — and excluding loss of data is fatal in any deal where the data is the point." }
+  ],
+  missing: "No carve-outs. Even a cap this broad should sit above liability for death or personal injury, fraud, breach of confidentiality, IP infringement and the indemnities. None of them are excepted here."
+},
+{
+  heading: "Indemnity",
+  text: "The Vendor shall indemnify, defend and hold harmless the Customer, its affiliates, officers, employees and agents from and against any and all claims, losses, liabilities, costs and expenses of any kind whatsoever arising out of or in any way connected with the Services, regardless of cause and including claims arising from the Customer's own negligence.",
+  mines: [
+    { p:"any and all claims, losses, liabilities, costs and expenses of any kind whatsoever",
+      why:"An uncapped, unqualified indemnity. No monetary limit, no requirement that the loss be direct or reasonable, and nothing tying it to the Vendor being at fault." },
+    { p:"in any way connected with",
+      why:"Far wider than 'arising out of'. 'Connected with' catches losses the Vendor neither caused nor could have prevented — the loss only has to be in the vicinity." },
+    { p:"regardless of cause",
+      why:"Removes the fault requirement altogether. The Vendor pays even where the loss had nothing to do with its performance." },
+    { p:"the Customer's own negligence",
+      why:"Indemnifying a counterparty against its own negligence is the most aggressive thing in this clause, and in several jurisdictions it needs express, conspicuous wording to work at all. Push back hard." }
+  ],
+  missing: "No cap, no notice provisions, no duty to mitigate, and no right for the Vendor to control the defence it is being made to pay for."
+},
+{
+  heading: "Termination",
+  text: "Either party may terminate this Agreement for convenience upon thirty (30) days' written notice. Upon any such termination the Customer shall pay all fees for the remainder of the Term, whether or not the Services have been performed. The Customer's licence to use the Deliverables shall terminate automatically, notwithstanding payment in full.",
+  mines: [
+    { p:"all fees for the remainder of the Term",
+      why:"A termination right you have to pay the entire contract value to exercise is not a termination right. This turns 'for convenience' into a fiction." },
+    { p:"whether or not the Services have been performed",
+      why:"Payment decoupled from delivery. The Customer funds work it will never receive." },
+    { p:"terminate automatically, notwithstanding payment in full",
+      why:"Deliverables paid for in full should survive termination. As drafted, the Customer buys something it loses the moment the contract ends." }
+  ],
+  missing: "No cure period before termination for material breach, no exit or transition assistance, and no list of which clauses survive."
+},
+{
+  heading: "Intellectual Property",
+  text: "All intellectual property rights created by the Consultant in the course of or in connection with the Services shall vest in the Client absolutely. The Consultant hereby assigns all such rights, together with all pre-existing materials, tools and methodologies used in performing the Services, and irrevocably waives all moral rights in perpetuity.",
+  mines: [
+    { p:"in connection with",
+      why:"'In the course of' is the defensible limb. 'In connection with' reaches sideways into work the Consultant did on its own time, and possibly for someone else." },
+    { p:"all pre-existing materials, tools and methodologies",
+      why:"Background IP signed away. A consultant who assigns its own toolkit cannot service its next client. This should be a licence, never an assignment." },
+    { p:"irrevocably waives all moral rights in perpetuity",
+      why:"Moral rights are not waivable everywhere, and blanket perpetual waivers get read down or struck out. Where they matter, deal with them expressly and narrowly." }
+  ],
+  missing: "No licence back to the Consultant for its residual know-how, and nothing on what happens to the assignment if the Client never pays."
+},
+{
+  heading: "Fees and Payment",
+  text: "The Client shall pay all undisputed invoices within ninety (90) days of receipt. The Supplier may revise the rates set out in Schedule 2 at any time on notice to the Client. Any additional work requested by the Client shall be charged at the Supplier's then-current rates, which shall be deemed accepted unless rejected in writing within two (2) business days.",
+  mines: [
+    { p:"within ninety (90) days",
+      why:"Ninety-day terms push the Supplier into financing the Client's working capital, and in several jurisdictions late-payment legislation makes terms this long challengeable." },
+    { p:"at any time on notice",
+      why:"A unilateral right to change the price. Notice is not consent — the Client has no right to refuse it and no right to walk away from it." },
+    { p:"then-current rates",
+      why:"Pricing by reference to a number that only one party controls and that appears nowhere in the contract." },
+    { p:"deemed accepted unless rejected in writing within two (2) business days",
+      why:"Deemed acceptance on a two-day fuse. One person on leave and the Client has agreed to a price it never saw." }
+  ],
+  missing: "No cap on rate increases, no annual review window, and no right for the Client to terminate if a revised rate is unacceptable."
+},
+{
+  heading: "Confidentiality",
+  text: "The Recipient shall use reasonable efforts to protect the Confidential Information. The Recipient may disclose Confidential Information to its affiliates, subcontractors and professional advisers without restriction. These obligations shall expire two (2) years from the date of disclosure. The Recipient may retain copies for archival purposes in accordance with its internal retention policies.",
+  mines: [
+    { p:"reasonable efforts",
+      why:"The market standard is at least the same degree of care the Recipient applies to its own confidential information, and in no event less than reasonable. 'Reasonable efforts' on its own is the floor, not the deal." },
+    { p:"without restriction",
+      why:"Onward disclosure with no flow-down. Once the information reaches a subcontractor under no equivalent obligation, it is effectively public and the Discloser has no recourse." },
+    { p:"expire two (2) years from the date of disclosure",
+      why:"Workable for ordinary commercial information, fatal for trade secrets — which lose their protection the moment the obligation lapses. Carve them out and keep them perpetual." },
+    { p:"retain copies for archival purposes in accordance with its internal retention policies",
+      why:"A return-and-destroy obligation with a hole in it large enough to keep everything, on terms the Recipient writes for itself." }
+  ],
+  missing: "No 'need to know' limit on who inside the Recipient may see it, and no obligation to tell the Discloser before making a compelled disclosure."
+},
+{
+  heading: "Disputes and Boilerplate",
+  text: "This Agreement shall be governed by the laws of Singapore. Any dispute arising under this Agreement shall be referred to arbitration. The Supplier may assign or novate this Agreement to any third party without the Customer's consent. No amendment shall be effective unless made in writing and signed by both parties, provided that the Supplier may update the Service Terms from time to time by posting a revised version online.",
+  mines: [
+    { p:"referred to arbitration",
+      why:"A bare agreement to arbitrate: no seat, no institutional rules, no number of arbitrators, no language. Clauses like this get litigated about before anything gets arbitrated, and occasionally fail altogether." },
+    { p:"assign or novate this Agreement to any third party without the Customer's consent",
+      why:"One-sided and unqualified. The Customer can wake up contracting with its counterparty's competitor, or with a shell company with no balance sheet." },
+    { p:"the Supplier may update the Service Terms from time to time by posting a revised version online",
+      why:"This proviso swallows the no-amendment clause immediately before it. One party can rewrite the bargain by editing a web page." }
+  ],
+  missing: "No jurisdiction clause to match the governing law, nothing recording which version of the Service Terms was incorporated at signature, and no change-of-control protection for the Customer."
+},
+{
+  heading: "Service Levels and Warranty",
+  text: "The Supplier shall use commercially reasonable endeavours to meet the service levels set out in Schedule 3. Service credits shall be the Customer's sole and exclusive remedy for any failure to meet the service levels. Deliverables shall be deemed accepted if the Customer does not respond within five (5) business days of delivery. The Supplier warrants that the Services will be performed in a professional manner, to the exclusion of all other warranties, whether implied by statute or otherwise.",
+  mines: [
+    { p:"commercially reasonable endeavours",
+      why:"A service level you only have to try to meet is not a service level. Performance against Schedule 3 should be an absolute obligation; the endeavours qualifier belongs somewhere else, if anywhere." },
+    { p:"sole and exclusive remedy",
+      why:"Credits are typically a few per cent of a monthly fee. Making them the only remedy means chronic failure costs the Supplier small change and leaves the Customer with no damages claim and no way out." },
+    { p:"deemed accepted if the Customer does not respond within five (5) business days",
+      why:"Acceptance by silence, on a short fuse, with no acceptance criteria anywhere to test the Deliverables against." },
+    { p:"to the exclusion of all other warranties, whether implied by statute or otherwise",
+      why:"Statutory implied terms cannot always be contracted out of. A blanket exclusion may be unenforceable — or may quietly remove the only warranty that had any teeth." }
+  ],
+  missing: "Nothing defines what 'professional manner' is measured against, there is no right to terminate for repeated service level failures, and no acceptance criteria for the Deliverables."
+}
+];
+
+/* =======================================================================
+   CONFIG
+   ======================================================================= */
+const ROUNDS      = 6;
+const ROUND_TIME  = 50;   // seconds
+const MINE_POINTS = 100;
+const WRONG_POINTS= -25;
+const WRONG_TIME  = 3;    // seconds lost
+const TIME_BONUS  = 4;    // points per second remaining
+
+const RANKS = [
+  { min:2200, name:"Landmine Whisperer", note:"Nothing gets past you. Your counterparties should be worried." },
+  { min:1750, name:"General Counsel",     note:"Sharp, fast and commercially awake. This is what good looks like." },
+  { min:1300, name:"Redline Veteran",     note:"You caught the ones that matter. A few subtle ones slipped by." },
+  { min:800,  name:"Contract Manager",    note:"Solid instincts. Slow down on the boilerplate — that is where they hide." },
+  { min:0,    name:"Still Reading the Recitals", note:"The dangerous words rarely look dangerous. Go again — it comes quickly." }
+];
+
+/* =======================================================================
+   STATE
+   ======================================================================= */
+let deck = [], roundIdx = 0, score = 0, timeLeft = 0, timer = null, paused = false;
+let found = [], wrongCount = 0, roundStartScore = 0;
+let totalMines = 0, totalFound = 0;
+
+function $(id){ return document.getElementById(id); }
+function show(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  $(id).classList.add('on');
+  window.scrollTo(0,0);
+}
+function shuffle(a){
+  a = a.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+/* =======================================================================
+   TOKENISER
+   Splits the clause into word spans, tagging each with its mine index.
+   ======================================================================= */
+function buildSegments(clause){
+  const marks = [];           // {start, end, idx}
+  clause.mines.forEach((m,i)=>{
+    const start = clause.text.indexOf(m.p);
+    if(start < 0){ console.error("Landmine phrase not found:", m.p); return; }
+    marks.push({ start, end:start + m.p.length, idx:i });
+  });
+  marks.sort((a,b)=>a.start-b.start);
+
+  const segs = [];
+  let cur = 0;
+  marks.forEach(mk=>{
+    if(mk.start > cur) segs.push({ text:clause.text.slice(cur, mk.start), idx:-1 });
+    segs.push({ text:clause.text.slice(mk.start, mk.end), idx:mk.idx });
+    cur = mk.end;
+  });
+  if(cur < clause.text.length) segs.push({ text:clause.text.slice(cur), idx:-1 });
+  return segs;
+}
+
+function renderClause(clause){
+  const host = $('clauseText');
+  host.innerHTML = '';
+  buildSegments(clause).forEach(seg=>{
+    // a landmine is one wrapper span, so the highlight flows as a single marker stroke
+    let box = host;
+    if(seg.idx >= 0){
+      box = document.createElement('span');
+      box.className = 'mineWrap';
+      box.dataset.mine = seg.idx;
+      box.addEventListener('click', onWordTap);
+      host.appendChild(box);
+    }
+    const parts = seg.text.split(/(\s+)/);
+    parts.forEach(part=>{
+      if(part === '') return;
+      if(/^\s+$/.test(part)){ box.appendChild(document.createTextNode(part)); return; }
+      if(seg.idx >= 0){ box.appendChild(document.createTextNode(part)); return; }
+      // bare punctuation outside a landmine is not a fair target
+      if(/^[^A-Za-z0-9]+$/.test(part)){
+        box.appendChild(document.createTextNode(part)); return;
+      }
+      const el = document.createElement('span');
+      el.className = 'w';
+      el.textContent = part;
+      el.dataset.mine = -1;
+      el.addEventListener('click', onWordTap);
+      box.appendChild(el);
+    });
+  });
+}
+
+/* =======================================================================
+   PLAY
+   ======================================================================= */
+function startGame(){
+  deck = shuffle(CLAUSES).slice(0, ROUNDS);
+  roundIdx = 0; score = 0; totalMines = 0; totalFound = 0;
+  deck.forEach(c => totalMines += c.mines.length);
+  loadRound();
+}
+
+function loadRound(){
+  const clause = deck[roundIdx];
+  found = clause.mines.map(()=>false);
+  wrongCount = 0;
+  roundStartScore = score;
+  timeLeft = ROUND_TIME;
+
+  $('roundLabel').textContent = 'Clause ' + (roundIdx+1) + ' of ' + deck.length;
+  $('clauseHeading').textContent = clause.heading;
+  updateScore();
+  updateFound();
+  renderClause(clause);
+  $('timerbar').classList.remove('low');
+  $('timerfill').style.width = '100%';
+
+  show('s-play');
+  hideToast();
+  startTimer();
+}
+
+/* ---- clock control: the clock stops while an explanation is on screen ---- */
+function startTimer(){
+  clearInterval(timer);
+  paused = false;
+  tickAcc = 0;
+  $('timerbar').classList.remove('paused');
+  $('clauseText').classList.remove('frozen');
+  timer = setInterval(tick, 250);
+}
+function pauseTimer(){
+  clearInterval(timer);
+  timer = null;
+  paused = true;
+  $('timerbar').classList.add('paused');
+  $('clauseText').classList.add('frozen');
+}
+function resumePlay(){
+  hideToast();
+  if(!paused) return;
+  paused = false;
+  $('timerbar').classList.remove('paused');
+  $('clauseText').classList.remove('frozen');
+  clearInterval(timer);
+  timer = setInterval(tick, 250);
+}
+
+let tickAcc = 0;
+function tick(){
+  tickAcc += 0.25;
+  if(tickAcc >= 1){ tickAcc = 0; timeLeft--; }
+  const pct = Math.max(0, timeLeft / ROUND_TIME) * 100;
+  $('timerfill').style.width = pct + '%';
+  $('timerbar').classList.toggle('low', timeLeft <= 10);
+  if(timeLeft <= 0){ endRound(false); }
+}
+
+function onWordTap(e){
+  if(paused) return;
+  const el = e.currentTarget;
+  const idx = parseInt(el.dataset.mine, 10);
+
+  if(idx >= 0 && !found[idx]){
+    found[idx] = true;
+    score += MINE_POINTS;
+    totalFound++;
+    el.classList.add('hit');
+    updateScore(); updateFound();
+    if(found.every(Boolean)){ endRound(true); return; }
+    // stop the clock so reading the explanation costs nothing
+    pauseTimer();
+    const left = found.filter(f=>!f).length;
+    $('toastBtn').textContent = left === 1 ? 'One more to find' : 'Keep looking';
+    toast('<b>Caught it.</b> ' + deck[roundIdx].mines[idx].why, false, true);
+    return;
+  }
+
+  if(idx >= 0) return;   // already-found mine, ignore
+
+  // wrong tap
+  wrongCount++;
+  score += WRONG_POINTS;
+  timeLeft = Math.max(0, timeLeft - WRONG_TIME);
+  el.classList.remove('wrong');
+  void el.offsetWidth;
+  el.classList.add('wrong');
+  setTimeout(()=>el.classList.remove('wrong'), 600);
+  toast('<b>Not that one.</b> &minus;25 points, &minus;3 seconds.', true);
+  updateScore();
+  if(timeLeft <= 0) endRound(false);
+}
+
+function updateScore(){ $('scoreLabel').textContent = score.toLocaleString() + ' pts'; }
+function updateFound(){
+  const n = found.filter(Boolean).length;
+  $('foundLabel').textContent = n + ' / ' + found.length + ' found';
+}
+
+let toastTimer = null;
+function toast(html, bad, hold){
+  const t = $('toast');
+  $('toastText').innerHTML = html;
+  t.classList.toggle('bad', !!bad);
+  $('toastActs').hidden = !hold;
+  t.classList.add('on');
+  clearTimeout(toastTimer);
+  if(!hold) toastTimer = setTimeout(()=>t.classList.remove('on'), 1800);
+}
+function hideToast(){
+  clearTimeout(toastTimer);
+  $('toast').classList.remove('on');
+  $('toastActs').hidden = true;
+}
+
+/* =======================================================================
+   ROUND SUMMARY
+   ======================================================================= */
+function endRound(cleared){
+  clearInterval(timer);
+  timer = null;
+  paused = false;
+  hideToast();
+
+  const clause = deck[roundIdx];
+  const got = found.filter(Boolean).length;
+  let bonus = 0;
+  if(cleared){ bonus = Math.max(0, timeLeft) * TIME_BONUS; score += bonus; }
+  const gained = score - roundStartScore;
+
+  $('sumTitle').textContent = cleared ? 'Clause cleared' : 'Time.';
+  let sub = 'You found ' + got + ' of ' + clause.mines.length + '.';
+  if(cleared && bonus > 0) sub += ' Speed bonus +' + bonus + '.';
+  if(wrongCount > 0) sub += ' ' + wrongCount + (wrongCount===1?' wrong tap.':' wrong taps.');
+  sub += ' ' + (gained >= 0 ? '+' : '') + gained.toLocaleString() + ' points this round.';
+  $('sumSub').textContent = sub;
+
+  const body = $('sumBody');
+  body.innerHTML = '';
+  clause.mines.forEach((m,i)=>{
+    const d = document.createElement('div');
+    d.className = 'mine';
+    d.innerHTML =
+      '<span class="tag ' + (found[i]?'got':'not') + '">' + (found[i]?'Found':'Missed') + '</span>' +
+      '<q>' + escapeHTML(m.p) + '</q>' +
+      '<p>' + m.why + '</p>';
+    body.appendChild(d);
+  });
+  const miss = document.createElement('div');
+  miss.className = 'missing';
+  miss.innerHTML = '<b>And what is not there</b>' + clause.missing;
+  body.appendChild(miss);
+
+  $('nextBtn').textContent = (roundIdx + 1 >= deck.length) ? 'See my final score' : 'Next clause';
+  show('s-summary');
+}
+
+function nextRound(){
+  roundIdx++;
+  if(roundIdx >= deck.length){ endGame(); return; }
+  loadRound();
+}
+
+function escapeHTML(s){
+  return s.replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+}
+
+/* =======================================================================
+   END
+   ======================================================================= */
+function endGame(){
+  const rank = RANKS.find(r => score >= r.min) || RANKS[RANKS.length-1];
+  $('finalScore').textContent = score.toLocaleString();
+  $('finalRank').textContent = rank.name;
+  $('finalDetail').textContent =
+    'You caught ' + totalFound + ' of ' + totalMines + ' risks across ' + deck.length + ' clauses. ' + rank.note;
+  show('s-end');
+}
+
+function shareScore(){
+  const rank = RANKS.find(r => score >= r.min) || RANKS[RANKS.length-1];
+  const text =
+    'Spot the Landmine — ' + score.toLocaleString() + ' points.\n' +
+    'I caught ' + totalFound + ' of ' + totalMines + ' contract risks across ' + deck.length + ' clauses.\n' +
+    'Rank: ' + rank.name + '.\n\n' +
+    'Think you can do better? ' + location.href;
+
+  const done = () => {
+    $('copied').textContent = 'Copied. Go and post it.';
+    setTimeout(()=>{ $('copied').textContent=''; }, 3500);
+  };
+
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done).catch(fallback);
+  } else { fallback(); }
+
+  function fallback(){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta);
+    ta.select();
+    try{ document.execCommand('copy'); done(); }
+    catch(e){ $('copied').textContent = 'Could not copy — screenshot it instead.'; }
+    document.body.removeChild(ta);
+  }
+}
+</script>
+</body>
+</html>
